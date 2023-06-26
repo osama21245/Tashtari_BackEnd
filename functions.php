@@ -32,14 +32,14 @@ function getAllData($table, $where = null, $values = null, $json = true)
         return $count;
     } else {
         if ($count > 0) {
-            return $data;
-        } else {
-            return json_encode(array("status" => "failure"));
+           return array("status" => "success", "data" => $data);
+         } else {
+            return array("status" => "failure");
         }
     }
 }
 
-function getData($table, $where = null, $values = null)
+function getData($table, $where = null, $values = null, $json = true)   
 {
     global $con;
     $data = array();
@@ -47,12 +47,15 @@ function getData($table, $where = null, $values = null)
     $stmt->execute($values);
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
     $count  = $stmt->rowCount();
-    if ($count > 0) {
-        echo json_encode(array("status" => "success", "data" => $data));
+    if ($json == true) {
+        if ($count > 0) {
+            echo json_encode(array("status" => "success", "data" => $data));
+        } else {
+            echo json_encode(array("status" => "failure"));
+        }
     } else {
-        echo json_encode(array("status" => "failure"));
+        return $count;
     }
-    return $count;
 }
 
 
@@ -151,6 +154,51 @@ function imageUpload($imageRequest)
 }
 
 
+function sendGCM($title, $message, $topic, $pageid, $pagename) {
+
+
+    $url = 'https://fcm.googleapis.com/fcm/send';
+
+
+    $fields = array(
+        "to" => '/topics/' . $topic,
+        'priority' => 'high',
+        'content_available' => true,
+
+        'notification' => array(
+            "body" =>  $message,
+            "title" =>  $title,
+            "click_action" => "FLUTTER_NOTIFICATION_CLICK",
+            "sound" => "default"
+
+        ),
+        'data' => array(
+            "pageid" => $pageid,
+            "pagename" => $pagename
+        )
+
+    );
+
+
+    $fields = json_encode($fields);
+    $headers = array(
+        'Authorization: key=' . "AAAAUlAkdu0:APA91bGfr-wuq1GsmB3okofkLgIvaomlqzmfzeCxccoGdtbMPcypOaM5YSto38r3gUWBvVnSGK25edizndp4Qhtr-iB-rHhG_F8NB6S9WGyfrL_9mFm8_UmGnxj6bYXpoGUJ7mG5Esqg",
+        'Content-Type: application/json'
+    );
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+
+    $result = curl_exec($ch);
+    return $result;
+    curl_close($ch);
+}
+
+
 
 function deleteFile($dir, $imagename)
 {
@@ -162,7 +210,7 @@ function deleteFile($dir, $imagename)
 // function checkAuthenticate()
 // {
 //     if (isset($_SERVER['PHP_AUTH_USER'])  && isset($_SERVER['PHP_AUTH_PW'])) {
-//         if ($_SERVER['PHP_AUTH_USER'] != "wael" ||  $_SERVER['PHP_AUTH_PW'] != "wael12345") {
+//         if ($_SERVER['PHP_AUTH_USER'] != "" ||  $_SERVER['PHP_AUTH_PW'] != "") {
 //             header('WWW-Authenticate: Basic realm="My Realm"');
 //             header('HTTP/1.0 401 Unauthorized');
 //             echo 'Page Not Found';
@@ -196,6 +244,6 @@ function result($count)
 
 function sendEmail($to, $title, $body)
 {
-    $header = "From: support@waelabohamza.com " . "\n" . "CC: waeleagle1243@gmail.com";
+    $header = "From: support@0samaahmed.com " . "\n" . "CC: osamagamil2070@gmail.com";
     mail($to, $title, $body, $header);
 }

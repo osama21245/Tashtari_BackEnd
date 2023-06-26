@@ -10,8 +10,14 @@ $categories = getAllData("categories",null,null,false);
 
 $alldata["categories"] = $categories;
 
+$settings = getAllData("settings",null,null,false);
 
-$items = getAllData("items1view","1=1",null,false);
+$alldata["settings"] = $settings;
+
+
+
+
+$items = getAllData("itemstopselling","1 = 1 ORDER BY countitems DESC	",null,false);
 
 $alldata["items"] = $items;
 
