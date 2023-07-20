@@ -52,6 +52,7 @@ if($count>0){
     $data2 = array( "cart_orders" => $maxid );
 
     updateData("cart",$data2 , "cart_usersid = $usersid AND cart_orders = 0");
+    insertNotifyAdmin("Notfication","There is a new order by user $usersid","admin","","ordersaccepted");
 
 }
 

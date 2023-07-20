@@ -1,6 +1,6 @@
 <?php
 
-include "../connect.php";
+include "../../connect.php";
  
 $password = sha1($_POST['password']);
 $email = filterRequest("email"); 
@@ -9,4 +9,4 @@ $email = filterRequest("email");
 // $count = $stmt->rowCount();
 // result($count) ; 
 
-getData("users" , "users_email = ? AND  users_password = ? AND users_approve != 0 " , array($email , $password)) ; 
+getData("admin" , "users_email = ? AND  users_password = ? AND users_approve = 1 " , array($email , $password)) ; 

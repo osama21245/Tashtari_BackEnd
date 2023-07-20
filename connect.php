@@ -1,9 +1,9 @@
 <?php
 
  
-$dsn = "mysql:host=localhost;dbname=" ; 
-$user = "" ;
-$pass = "" ; 
+$dsn = "**************" ; 
+$user = "*********" ;
+$pass = "*****" ; 
 $option = array(
     PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES UTF8" // FOR Arabic
 );

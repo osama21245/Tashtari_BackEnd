@@ -17,7 +17,7 @@ $alldata["settings"] = $settings;
 
 
 
-$items = getAllData("itemstopselling","1 = 1 ORDER BY countitems DESC	",null,false);
+$items = getAllData("itemstopselling","1 = 1 ORDER BY countitems DESC",null,false);
 
 $alldata["items"] = $items;
 

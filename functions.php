@@ -128,29 +128,33 @@ function deleteData($table, $where, $json = true)
     return $count;
 }
 
-function imageUpload($imageRequest)
+function imageUpload($dir,$imageRequest)
 {
     global $msgError;
-    $imagename  = rand(1000, 10000) . $_FILES[$imageRequest]['name'];
-    $imagetmp   = $_FILES[$imageRequest]['tmp_name'];
-    $imagesize  = $_FILES[$imageRequest]['size'];
-    $allowExt   = array("jpg", "png", "gif", "mp3", "pdf");
-    $strToArray = explode(".", $imagename);
-    $ext        = end($strToArray);
-    $ext        = strtolower($ext);
+    if(isset($_FILES[$imageRequest])){$imagename  = rand(1000, 10000) . $_FILES[$imageRequest]['name'];
+        $imagetmp   = $_FILES[$imageRequest]['tmp_name'];
+        $imagesize  = $_FILES[$imageRequest]['size'];
+        $allowExt   = array("jpg", "png", "gif", "mp3", "pdf","svg");
+        $strToArray = explode(".", $imagename);
+        $ext        = end($strToArray);
+        $ext        = strtolower($ext);
+    
+        if (!empty($imagename) && !in_array($ext, $allowExt)) {
+            $msgError = "EXT";
+        }
+        if ($imagesize > 2 * MB) {
+            $msgError = "size";
+        }
+        if (empty($msgError)) {
+            move_uploaded_file($imagetmp,  $dir. "/" . $imagename);
+            return $imagename;
+        } else {
+            return "fail";
+        }}else{
 
-    if (!empty($imagename) && !in_array($ext, $allowExt)) {
-        $msgError = "EXT";
-    }
-    if ($imagesize > 2 * MB) {
-        $msgError = "size";
-    }
-    if (empty($msgError)) {
-        move_uploaded_file($imagetmp,  "../upload/" . $imagename);
-        return $imagename;
-    } else {
-        return "fail";
-    }
+            return "empty";
+        }
+    
 }
 
 
@@ -182,7 +186,7 @@ function sendGCM($title, $message, $topic, $pageid, $pagename) {
 
     $fields = json_encode($fields);
     $headers = array(
-        'Authorization: key=' . "AAAAUlAkdu0:APA91bGfr-wuq1GsmB3okofkLgIvaomlqzmfzeCxccoGdtbMPcypOaM5YSto38r3gUWBvVnSGK25edizndp4Qhtr-iB-rHhG_F8NB6S9WGyfrL_9mFm8_UmGnxj6bYXpoGUJ7mG5Esqg",
+        'Authorization: key=' . "**************",
         'Content-Type: application/json'
     );
 
@@ -199,6 +203,123 @@ function sendGCM($title, $message, $topic, $pageid, $pagename) {
 }
 
 
+function insertNotify($title, $body, $userid, $topic, $pageid, $pagename)
+{
+    global $con;
+    $stmt  = $con->prepare("INSERT INTO `notification`(  `notification_title`, `notification_body`, `notification_usersid`) VALUES (? , ? , ?)");
+    $stmt->execute(array($title, $body, $userid));
+    sendGCM($title,  $body, $topic, $pageid, $pagename);
+    $count = $stmt->rowCount();
+    return $count;
+}
+
+function sendGCMDelivery($title, $message, $topic, $pageid, $pagename) {
+
+
+    $url = 'https://fcm.googleapis.com/fcm/send';
+
+
+    $fields = array(
+        "to" => '/topics/' . $topic,
+        'priority' => 'high',
+        'content_available' => true,
+
+        'notification' => array(
+            "body" =>  $message,
+            "title" =>  $title,
+            "click_action" => "FLUTTER_NOTIFICATION_CLICK",
+            "sound" => "default"
+
+        ),
+        'data' => array(
+            "pageid" => $pageid,
+            "pagename" => $pagename
+        )
+
+    );
+
+
+    $fields = json_encode($fields);
+    $headers = array(
+        'Authorization: key=' . "************",
+        'Content-Type: application/json'
+    );
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+
+    $result = curl_exec($ch);
+    return $result;
+    curl_close($ch);
+}
+
+function insertNotifyDelivery($title, $body, $userid, $topic, $pageid, $pagename)
+{
+    global $con;
+    $stmt  = $con->prepare("INSERT INTO `notification`(  `notification_title`, `notification_body`, `notification_usersid`) VALUES (? , ? , ?)");
+    $stmt->execute(array($title, $body, $userid));
+    sendGCMDelivery($title,  $body, $topic, $pageid, $pagename);
+    $count = $stmt->rowCount();
+    return $count;
+}
+function sendGCMAdmin($title, $message, $topic, $pageid, $pagename) {
+
+
+    $url = 'https://fcm.googleapis.com/fcm/send';
+
+
+    $fields = array(
+        "to" => '/topics/' . $topic,
+        'priority' => 'high',
+        'content_available' => true,
+
+        'notification' => array(
+            "body" =>  $message,
+            "title" =>  $title,
+            "click_action" => "FLUTTER_NOTIFICATION_CLICK",
+            "sound" => "default"
+
+        ),
+        'data' => array(
+            "pageid" => $pageid,
+            "pagename" => $pagename
+        )
+
+    );
+
+
+    $fields = json_encode($fields);
+    $headers = array(
+        'Authorization: key=' . "***********************",
+        'Content-Type: application/json'
+    );
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+
+    $result = curl_exec($ch);
+    return $result;
+    curl_close($ch);
+}
+function insertNotifyAdmin($title, $body, $topic, $pageid, $pagename)
+{
+    global $con;
+    $stmt  = $con->prepare("INSERT INTO `notification_admin`(  `notification_title`, `notification_body`) VALUES (? , ?)");
+    $stmt->execute(array($title, $body));
+    sendGCMAdmin($title,  $body, $topic, $pageid, $pagename);
+    $count = $stmt->rowCount();
+    return $count;
+}
+
+
 
 function deleteFile($dir, $imagename)
 {
@@ -207,21 +328,21 @@ function deleteFile($dir, $imagename)
     }
 }
 
-// function checkAuthenticate()
-// {
-//     if (isset($_SERVER['PHP_AUTH_USER'])  && isset($_SERVER['PHP_AUTH_PW'])) {
-//         if ($_SERVER['PHP_AUTH_USER'] != "" ||  $_SERVER['PHP_AUTH_PW'] != "") {
-//             header('WWW-Authenticate: Basic realm="My Realm"');
-//             header('HTTP/1.0 401 Unauthorized');
-//             echo 'Page Not Found';
-//             exit;
-//         }
-//     } else {
-//         exit;
-//     }
+function checkAuthenticate()
+{
+    if (isset($_SERVER['PHP_AUTH_USER'])  && isset($_SERVER['PHP_AUTH_PW'])) {
+        if ($_SERVER['PHP_AUTH_USER'] != "*****" ||  $_SERVER['PHP_AUTH_PW'] != "*******") {
+            header('WWW-Authenticate: Basic realm="My Realm"');
+            header('HTTP/1.0 401 Unauthorized');
+            echo 'Page Not Found';
+            exit;
+        }
+    } else {
+        exit;
+    }
 
-//     // End 
-// }
+    // End 
+}
 
 
 function   printFailure($message = "none")
@@ -244,6 +365,12 @@ function result($count)
 
 function sendEmail($to, $title, $body)
 {
-    $header = "From: support@0samaahmed.com " . "\n" . "CC: osamagamil2070@gmail.com";
+    $header = "From:*********" . "\n" . "CC: ********";
+    mail($to, $title, $body, $header);
+}
+
+function sendEmail2($to, $title, $body)
+{
+    $header = "From: ********** " . "\n" . "CC: **********";
     mail($to, $title, $body, $header);
 }

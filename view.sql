@@ -59,4 +59,4 @@ RIGHT JOIN orders ON orders.orders_address = adress.address_id
 
  
 
- 
+ "1=1 AND orders_status = 2 OR (orders_status = 3 AND orders_deliveryman = $deliverymanID) "

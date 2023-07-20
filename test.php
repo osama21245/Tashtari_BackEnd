@@ -1,8 +1,8 @@
 <?php 
-include "../connect.php";
+include "./connect.php";
 
 
-sendGCM("Hello","Howareyou","users","","");
+sendEmail2("osamagamil2070@gmail.com","Your Code","56783");
 echo "send" ;
 
 
